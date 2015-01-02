@@ -18,6 +18,8 @@ set(SOURCE_FILES
   routes.c
   utils.c
   utils.h
+  deps/http_parser.c
+  deps/http_parser.h
 )
 
 add_executable(uv_webserver ${SOURCE_FILES})

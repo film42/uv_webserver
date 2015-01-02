@@ -22,5 +22,5 @@ int main(int argc, char const *argv[]) {
   ws_get("/hannah", hannah_route_cb);
   ws_get("/hannah/me", hannah_route_cb);
 
-  ws_start();
+  return ws_start();
 }
