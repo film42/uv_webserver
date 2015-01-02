@@ -12,7 +12,13 @@ find_library(
   HINTS /usr/local/lib
 )
 
-set(SOURCE_FILES webserver.c webserver.h routes.c)
+set(SOURCE_FILES
+  webserver.c
+  webserver.h
+  routes.c
+  utils.c
+  utils.h
+)
 
 add_executable(uv_webserver ${SOURCE_FILES})
 

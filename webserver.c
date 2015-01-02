@@ -5,22 +5,18 @@
 #include <string.h>
 
 #include "webserver.h"
-
-#define ws_logger printf
+#include "utils.h"
 
 uv_loop_t * loop;
 
 typedef struct {
   char *        path;
+  ssize_t       length;
   on_request_cb on_req_cb;
 } route_t;
 
 route_t * routes;
 ssize_t route_count;
-
-typedef struct {
-  char * path;
-} request_t;
 
 void ws_free_on_write_cb(uv_buf_t *buf) {
   free(buf->base);
@@ -29,6 +25,7 @@ void ws_free_on_write_cb(uv_buf_t *buf) {
 void ws_get(char * route, on_request_cb request_cb) {
   route_t new_route;
   new_route.path = route;
+  new_route.length = strlen(route);
   new_route.on_req_cb = request_cb;
 
   routes[route_count] = new_route;
@@ -85,25 +82,27 @@ static void on_read(uv_stream_t *client, ssize_t nread, const uv_buf_t *buf) {
   /* Get the route length so we can copy it */
   ssize_t route_length = (cursor_end - buf->base) - (cursor_start + 1 - buf->base);
   char * route_buffer = (char *) malloc(sizeof(char) * (route_length + 1));
-  route_buffer[route_length + 1] = '\0';
   strncpy(route_buffer, (cursor_start + 1), route_length);
+  route_buffer[route_length + 1] = '\0';
 
-//  printf("%d %d %d\n", (cursor_start + 1 - buf->base), (cursor_end - buf->base), route_length);
-
-  ws_logger("[PATH: '%s']\n", route_buffer);
+  ws_logger("[time: %s, path: '%s']\n", ws_timestamp(), route_buffer);
 
   /* Match route */
   int i = 0;
   for(; i < route_count; ++i) {
-    if(strcmp(routes[i].path, route_buffer) == 0) {
-      uv_buf_t resp_buf = routes[i].on_req_cb();
+    /* Match length */
+    if(routes[i].length == route_length) {
+      /* Match characters */
+      if(strncmp(routes[i].path, route_buffer, routes[i].length) == 0) {
+        uv_buf_t resp_buf = routes[i].on_req_cb();
 
-      uv_write_t * req = (uv_write_t *) malloc(sizeof(uv_write_t));
+        uv_write_t * req = (uv_write_t *) malloc(sizeof(uv_write_t));
 
-      uv_write(req, client, &resp_buf, 1, on_write);
-      free(buf->base);
-      free(route_buffer);
-      return;
+        uv_write(req, client, &resp_buf, 1, on_write);
+        free(buf->base);
+        free(route_buffer);
+        return;
+      }
     }
   }
 
