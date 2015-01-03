@@ -1,7 +1,12 @@
 #include "webserver.h"
 
 uv_buf_t home_route_cb(void) {
-  return ws_http_response(200, "Home page!");
+  return ws_http_response(200,
+      "<center>"
+          "<h3>Home page!</h3>"
+          "<marquee>Hello, welcome to my libuv webapp!</marquee>"
+      "</center>"
+  );
 }
 
 uv_buf_t about_route_cb(void) {
