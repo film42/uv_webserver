@@ -10,4 +10,4 @@ This is most likely broken.
 
 ### License
 
-None
+No warranty of any kind. Blah blah blah. Free for everyone. Etc etc etc.
